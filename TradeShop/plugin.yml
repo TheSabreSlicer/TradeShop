@@ -1,0 +1,20 @@
+name: TradeShop
+version: 0.0.1
+description: Plugin that allows players to create a trade based shop.
+authors: [Alshain01, Connick Shields]
+#website: http://
+main: alshain01.TradeShop.TradeShop
+softdepend: [Flags]
+commands:
+  tradeshop:
+    description: Allows you to perform actions on TradeShops.
+    permission: tradeshop.user
+    usage: /tradeshop <create|add|delete>
+    alisases: ss
+permissions:
+  tradeshop.user:
+    description: Gives access to create TradeShop.
+    default: true
+  tradeshop.destroy:
+    description: Allows a user to destroy any TradeShop chest, regardless of owner.
+    default: op
