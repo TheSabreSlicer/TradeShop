@@ -24,7 +24,7 @@ public class EventListener implements Listener {
 		if(e.getClickedBlock().getType() != Material.CHEST) { return; }
 		
 		// Is the player in "creation mode"?
-		if(TradeShop.instance.createMode.containsKey(e.getPlayer())) {
+		if(TradeShop.instance.createQueue.containsKey(e.getPlayer())) {
 			// Handle the shop creation flag
 			if(TradeShop.instance.flags) {
 				Area a = Director.getAreaAt(e.getPlayer().getLocation());
@@ -46,7 +46,7 @@ public class EventListener implements Listener {
 			data.set(blockLoc + ".Owner", e.getPlayer().getName());
 			
 			//TODO: Send the player a confirmation of shop creation
-			TradeShop.instance.createMode.remove(e.getPlayer());
+			TradeShop.instance.createQueue.remove(e.getPlayer());
 		}
 	}
 	

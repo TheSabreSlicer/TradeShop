@@ -16,10 +16,11 @@ import alshain01.Flags.Flags;
 public class TradeShop extends JavaPlugin {
 	public static TradeShop instance;
 	protected CustomYML shopData = new CustomYML(this, "data.yml");
+	protected CustomYML messageReader = new CustomYML(this, "message.yml");
 	
 	//TODO: Create an async task to remove players from the list after a timeout.
-	protected ConcurrentHashMap<Player, Long> createMode = new ConcurrentHashMap<Player, Long>();
-	protected ConcurrentHashMap<Player, Trade> modifyMode = new ConcurrentHashMap<Player, Trade>();
+	protected ConcurrentHashMap<Player, Long> createQueue = new ConcurrentHashMap<Player, Long>();
+	protected ConcurrentHashMap<Player, Trade> modifyQueue = new ConcurrentHashMap<Player, Trade>();
 	protected boolean flags = false;
 
 	@Override
@@ -41,45 +42,80 @@ public class TradeShop extends JavaPlugin {
 	
 	@Override
 	public boolean onCommand(CommandSender sender, Command cmd, String label, String args[]) {
-		if(!(sender instanceof Player)) { return false; } //TODO: Send the console a message
-		if(args.length < 1) { return false; } //TODO: Send the player a nice message explaining their error
+		final String addHelp = "/tradeshop add <material> <quantity> <material> <quantity>";
+		final String deleteHelp = "/tradeshop delete <material> <material>";
+		
+		if(!(sender instanceof Player)) {
+			sender.sendMessage(Message.NoConsoleError.get());
+			return true;
+		}
+		
+		if(args.length < 1) { return false; }
 		
 		if(cmd.getName().equalsIgnoreCase("tradeshop")) {
 			if(args[0].equalsIgnoreCase("create")) {
-				// TODO: Send the player a message to let them know they are in create mode
-				createMode.put(((Player)sender), new Date().getTime());
-				return true;
-			} else if (args[0].equalsIgnoreCase("add")) {
-				//TODO: Send the player a nice message explaining their error
-				if(args.length != 5) { return false; }
-				Material tradeItem = Material.getMaterial(args[1]);
-				Material tradeForItem = Material.getMaterial(args[3]);
 				
-				if(tradeItem == null || tradeForItem == null) {
-					//TODO: Send the player a message explaining their error
+				// Add the creation to the queue
+				sender.sendMessage(Message.CreateMode.get());
+				createQueue.put(((Player)sender), new Date().getTime());
+				return true;
+				
+			} else if (args[0].equalsIgnoreCase("add") || args[0].equalsIgnoreCase("delete")) {
+				
+				// Check the argument formatting
+				if(args.length != 3 || args.length != 5) {
+					if(args[0].equalsIgnoreCase("add")) {
+						sender.sendMessage(addHelp);
+					} else {
+						sender.sendMessage(deleteHelp);
+					}
 					return true;
 				}
 				
+				// Parse the arguments
+				Material tradeItem = Material.getMaterial(args[1]);
+				Material tradeForItem = null;
 				int tradeQty = 0;
 				int tradeForQty = 0;
-				try {
-					tradeQty = Integer.valueOf(args[2]);
-					tradeForQty = Integer.valueOf(args[4]);
-				} catch (NumberFormatException ex) {
-					//TODO: Send the player a message explaining their error
+				
+				// Find the second material and quantities
+				if (args.length == 5) {
+					tradeForItem = Material.getMaterial(args[3]);
+
+					try {
+						tradeQty = Integer.valueOf(args[2]);
+						tradeForQty = Integer.valueOf(args[4]);
+					} catch (NumberFormatException ex) {
+						sender.sendMessage(addHelp);
+						return true;
+					}
+				} else {
+					tradeForItem = Material.getMaterial(args[2]);
+				}
+				
+				// Check that valid materials were provided.
+				if(tradeItem == null || tradeForItem == null) {
+					String item;
+					if (tradeItem == null) { item = args[1]; }
+					else {
+						if(args[0].equalsIgnoreCase("add")) {
+							item = args[3];
+						} else {
+							item = args[2];
+						}
+					}
+
+					sender.sendMessage(Message.InvalidMaterialError.get()
+							.replaceAll("\\{Material\\}", item));
 					return true;
 				}
 				
-				modifyMode.put((Player)sender, new Trade(tradeItem, tradeForItem, tradeQty, tradeForQty));
+				// Add the modification to the queue.
+				sender.sendMessage(Message.ModifyMode.get());
+				modifyQueue.put((Player)sender, new Trade(tradeItem, tradeForItem, tradeQty, tradeForQty));
 				return true;
-			} else if (args[0].equalsIgnoreCase("delete")) {
-				//TODO: Send the player a nice message explaining their error
-				if(args.length != 3) { return false; }
-				
-				//TODO: everything here
 			}
 		}
 		return false;
 	}
-	
 }
