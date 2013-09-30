@@ -50,6 +50,7 @@ public class ShopManager implements Listener {
 		
 		// Everything seems to be in order, create the shop.
 		data.set(blockLoc + ".Owner", e.getPlayer().getName());
+		data.set(blockLoc + ".NextID", 0);
 		e.getPlayer().sendMessage(Message.ShopCreated.get());
 		TradeShop.instance.createQueue.remove(e.getPlayer());
 	}
