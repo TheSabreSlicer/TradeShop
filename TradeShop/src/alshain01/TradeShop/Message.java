@@ -9,7 +9,8 @@ import org.bukkit.ChatColor;
 */
 public enum Message {
 	// Errors
-	NoConsoleError, InvalidMaterialError, CreateMode, ModifyMode;
+	NoConsoleError, InvalidMaterialError, ShopExistsError, RemoveShopError,
+	TradeShopRemoved, CreateMode, ModifyMode, ShopCreated;
 	
 	/**
 	* @return A localized message for the enumeration.

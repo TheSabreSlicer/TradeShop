@@ -14,7 +14,7 @@ import alshain01.Flags.Flag;
 import alshain01.Flags.Flags;
 import alshain01.Flags.area.Area;
 
-public class EventListener implements Listener {
+public class ShopManager implements Listener {
 	/*
 	 *  Handles the creation of a shop
 	 */
@@ -24,30 +24,34 @@ public class EventListener implements Listener {
 		if(e.getClickedBlock().getType() != Material.CHEST) { return; }
 		
 		// Is the player in "creation mode"?
-		if(TradeShop.instance.createQueue.containsKey(e.getPlayer())) {
-			// Handle the shop creation flag
-			if(TradeShop.instance.flags) {
-				Area a = Director.getAreaAt(e.getPlayer().getLocation());
-				Flag f = Flags.instance.getRegistrar().getFlag("SSAllowCreate");
-				
-				if(!a.getValue(f, false)
-						&& !f.hasBypassPermission(e.getPlayer()) 
-						&& !a.getTrustList(f).contains(e.getPlayer().getName())) { 
-					e.getPlayer().sendMessage(a.getMessage(f).replaceAll("\\{Player\\}", e.getPlayer().getName()));
-					return; 
-				}
-			}
+		if(!TradeShop.instance.createQueue.containsKey(e.getPlayer())) { return; }
 		
-			String blockLoc = e.getClickedBlock().getLocation().toString();
-			ConfigurationSection data = TradeShop.instance.shopData.getConfig().getConfigurationSection("Shops");
+		// Handle the shop creation flag
+		if(TradeShop.instance.flags) {
+			Area a = Director.getAreaAt(e.getPlayer().getLocation());
+			Flag f = Flags.instance.getRegistrar().getFlag("TSAllowCreate");
 			
-			// Is that chest already a shop?
-			if(data.getKeys(false).contains(blockLoc)) { return; }
-			data.set(blockLoc + ".Owner", e.getPlayer().getName());
-			
-			//TODO: Send the player a confirmation of shop creation
-			TradeShop.instance.createQueue.remove(e.getPlayer());
+			if(!a.getValue(f, false)
+					&& !f.hasBypassPermission(e.getPlayer()) 
+					&& !a.getTrustList(f).contains(e.getPlayer().getName())) { 
+				e.getPlayer().sendMessage(a.getMessage(f).replaceAll("\\{Player\\}", e.getPlayer().getName()));
+				return;
+			}
 		}
+	
+		String blockLoc = e.getClickedBlock().getLocation().toString();
+		ConfigurationSection data = TradeShop.instance.shopData.getConfig().getConfigurationSection("Shops");
+		
+		// Is that chest already a shop?
+		if(data.getKeys(false).contains(blockLoc)) {
+			e.getPlayer().sendMessage(Message.ShopExistsError.get());
+			return;
+		}
+		
+		// Everything seems to be in order, create the shop.
+		data.set(blockLoc + ".Owner", e.getPlayer().getName());
+		e.getPlayer().sendMessage(Message.ShopCreated.get());
+		TradeShop.instance.createQueue.remove(e.getPlayer());
 	}
 	
 	/*
@@ -56,16 +60,18 @@ public class EventListener implements Listener {
 	@EventHandler(priority = EventPriority.LOWEST)
 	private void onBlockBreak(BlockBreakEvent e) {
 		if(e.getBlock().getType() != Material.CHEST) { return; }
-		if(e.getPlayer().hasPermission("simpleshop.destroy")) { return; }
+		if(e.getPlayer().hasPermission("simpleshop.admin")) { return; }
 		
 		String blockLoc = e.getBlock().getLocation().toString();
 		ConfigurationSection data = TradeShop.instance.shopData.getConfig().getConfigurationSection("Shops");
 		
-		// Check to see if the chest is one that SimpleShops claims domain over.
+		// Check to see if the chest is one that TradeShop claims domain over.
 		if(data.getKeys(false).contains(blockLoc.toString())) {
 			// Check to see if the player can destroy this block
-			if(!data.getString(blockLoc.toString() + ".Owner").equalsIgnoreCase(e.getPlayer().getName())) {
-				//TODO: send the player a message saying they can't do that
+			String owner = data.getString(blockLoc.toString() + ".Owner");
+			if(!owner.equalsIgnoreCase(e.getPlayer().getName())) {
+				e.getPlayer().sendMessage(Message.RemoveShopError.get()
+						.replaceAll("\\{Owner\\}", owner));
 				e.setCancelled(true);
 			}
 		}
@@ -80,7 +86,7 @@ public class EventListener implements Listener {
 		ConfigurationSection data = TradeShop.instance.shopData.getConfig().getConfigurationSection("Shops");
 		
 		if(data.getKeys(false).contains(blockLoc.toString())) {
-			//TODO: Send the player a message saying the shop was destroyed
+			e.getPlayer().sendMessage(Message.TradeShopRemoved.get());
 			data.set(blockLoc, null);
 		}
 	}
