@@ -5,7 +5,6 @@ import java.util.Date;
 import org.bukkit.Material;
 
 public class Trade {
-	private Long id;
 	private long createTime;
 	private TradeItem[] items = new TradeItem[3];
 	
@@ -23,8 +22,6 @@ public class Trade {
 	}
 	
 	public Trade(Material sellItem, Material buyItem, int sellQty, int buyQty) {
-		id = null;
-		
 		items[0].item  = buyItem;
 		items[1].item  = null;
 		items[2].item = sellItem;
@@ -32,14 +29,11 @@ public class Trade {
 		items[0].quantity = buyQty;
 		items[1].quantity = 0;
 		items[2].quantity = sellQty;
-
 		
 		this.createTime = new Date().getTime();
 	}
 	
 	public Trade(Material sellItem, Material buyItem1, Material buyItem2, int sellQty, int buyQty1, int buyQty2) {
-		id = null;
-		
 		items[0].item  = buyItem1;
 		items[1].item  = buyItem2;
 		items[2].item = sellItem;
@@ -66,9 +60,5 @@ public class Trade {
 	
 	public long getCreationTime() {
 		return createTime;
-	}
-	
-	public long getID() {
-		return id;
 	}
 }

@@ -13,8 +13,8 @@ commands:
     alisases: ss
 permissions:
   tradeshop.user:
-    description: Gives access to create TradeShop.
+    description: Gives access to create a TradeShop.
     default: true
-  tradeshop.destroy:
-    description: Allows a user to destroy any TradeShop chest, regardless of owner.
+  tradeshop.admin:
+    description: Allows a user to view and destroy any TradeShop chest, regardless of owner.
     default: op
