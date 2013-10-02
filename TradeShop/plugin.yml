@@ -10,7 +10,7 @@ commands:
     description: Allows you to perform actions on TradeShops.
     permission: tradeshop.user
     usage: /tradeshop <create|add|delete>
-    alisases: ss
+    alisases: ts
 permissions:
   tradeshop.user:
     description: Gives access to create a TradeShop.
